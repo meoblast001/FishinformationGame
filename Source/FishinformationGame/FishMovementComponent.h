@@ -36,6 +36,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float RotationSpeed;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float MaximumVelocity;
+
 private:
     AActor* Owner;
     UMeshComponent* MeshComponent;

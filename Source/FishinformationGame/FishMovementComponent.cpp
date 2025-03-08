@@ -16,7 +16,19 @@ void UFishMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     if (MeshComponent != nullptr)
+    {
         MeshComponent->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
+
+        // If velocity exceeds maximum velocity, create an inverted vector of the excess velocity vector and apply it
+        // as an impulse to counteract it (i.e. capping velocity at max velocity).
+        FVector Velocity = MeshComponent->GetPhysicsLinearVelocity();
+        double VelocityMagnitude = Velocity.Size();
+        if (VelocityMagnitude > MaximumVelocity)
+        {
+            FVector OutOfBoundsVelocity = Velocity - Velocity.GetSafeNormal() * MaximumVelocity;
+            MeshComponent->AddImpulse(-OutOfBoundsVelocity * MeshComponent->GetMass());
+        }
+    }
 }
 
 void UFishMovementComponent::SetMeshComponent(UMeshComponent* MeshComponent)
@@ -39,7 +51,6 @@ void UFishMovementComponent::MoveForward()
 {
     if (MeshComponent == nullptr)
         return;
-    const auto WorldSpaceForce = GetOwner()->GetActorTransform().TransformVector(FVector(ForwardSpeed, 0.0, 0.0));
+    FVector WorldSpaceForce = Owner->GetActorTransform().TransformVector(FVector(ForwardSpeed, 0.0, 0.0));
     MeshComponent->AddForce(WorldSpaceForce);
 }
-
